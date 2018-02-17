@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
   before_action :require_user_logged_in, only: [:index, :show, :followings, :followers]
+  before_action :correct_user, only: [:favorite_microposts]
   # before_action :require_user_logged_in, only: %i(index show)
   # %w(some thing)
   
@@ -42,10 +43,21 @@ class UsersController < ApplicationController
     counts(@user)
   end
   
+  def favorite_microposts
+    @user = User.find(params[:id])
+    @favorite_microposts = @user.favorite_microposts.order('created_at DESC').page(params[:page])
+  end
   
   private
   
   def user_params
     params.require(:user).permit(:name, :email, :password, :password_confirmation)
   end
+  
+  def correct_user
+    unless current_user == User.find(params[:id])
+      redirect_to root_url
+    end
+  end
+  
 end
